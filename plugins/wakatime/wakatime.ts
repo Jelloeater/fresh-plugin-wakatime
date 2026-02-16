@@ -1,6 +1,6 @@
 /// <reference path="./lib/fresh.d.ts" />
 
-const VERSION = "0.5.0";
+const VERSION = "0.6.0";
 
 const PLUGIN_USER_AGENT = `fresh-wakatime/${VERSION}`;
 const GITHUB_RELEASES_URL = "https://api.github.com/repos/wakatime/wakatime-cli/releases/latest";
@@ -40,7 +40,9 @@ function getConfigFilePath(): string {
 }
 
 function getFreshConfigPath(): string {
-  return editor.pathJoin(editor.getConfigDir(), "wakatime.json");
+  const configDir = editor.getConfigDir();
+  editor.debug(`[wakatime] Config dir: ${configDir}`);
+  return editor.pathJoin(configDir, "wakatime.json");
 }
 
 function loadFreshConfig(): { enabled: boolean } {

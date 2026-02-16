@@ -1,6 +1,6 @@
 {
   "name": "wakatime",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Automatic time tracking for Fresh editor",
   "type": "plugin",
   "fresh": {
