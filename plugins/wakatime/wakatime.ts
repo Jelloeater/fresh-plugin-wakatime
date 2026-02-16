@@ -13,6 +13,7 @@ const HEARTBEAT_INTERVAL_MS = 2 * 60 * 1000;
 let enabled = false;
 let cachedOs: string | null = null;
 let cachedArch: string | null = null;
+let cliFromPath: string | null = null;
 
 function getEditor() {
   return globalThis.editor;
@@ -142,6 +143,24 @@ async function getEnvVar(name: string): Promise<string | null> {
   return null;
 }
 
+async function findWakatimeOnPath(): Promise<string | null> {
+  if (cliFromPath) return cliFromPath;
+  try {
+    const result = await editor.spawnProcess("sh", ["-c", "command -v wakatime || which wakatime"]);
+    if (result.exit_code === 0) {
+      const path = result.stdout.trim();
+      if (path) {
+        cliFromPath = path;
+        editor.debug(`[wakatime] Found wakatime on PATH: ${path}`);
+        return path;
+      }
+    }
+  } catch {
+    // Not on PATH
+  }
+  return null;
+}
+
 async function getApiKey(): Promise<string | null> {
   const envKey = await getEnvVar("WAKATIME_API_KEY");
   if (envKey && isValidApiKey(envKey)) {
@@ -232,6 +251,11 @@ async function downloadCli(): Promise<boolean> {
 }
 
 async function ensureCli(): Promise<boolean> {
+  if (await findWakatimeOnPath()) {
+    editor.debug("[wakatime] Using wakatime from PATH");
+    return true;
+  }
+
   if (await cliExists()) {
     const current = await getCliVersion();
     const latest = await getLatestCliVersion();
@@ -278,10 +302,13 @@ async function sendHeartbeat(file: string, isWrite: boolean): Promise<void> {
     return;
   }
 
-  const cliPath = getCliPath();
-  if (!(await cliExists())) {
-    editor.debug("[wakatime] CLI not found");
-    return;
+  let cliPath = await findWakatimeOnPath();
+  if (!cliPath) {
+    cliPath = getCliPath();
+    if (!(await cliExists())) {
+      editor.debug("[wakatime] CLI not found (not on PATH and no local install)");
+      return;
+    }
   }
 
   const args = buildHeartbeatArgs(file, isWrite, apiKey);
@@ -380,11 +407,12 @@ globalThis.wakatime_set_api_key = async function (): Promise<void> {
 
 globalThis.wakatime_status = async function (): Promise<void> {
   const apiKey = await getApiKey();
-  const cliPath = getCliPath();
-  const hasCli = editor.fileExists(cliPath);
+  const pathCli = await findWakatimeOnPath();
+  const localCli = getCliPath();
+  const hasLocalCli = await cliExists();
 
   let status = `WakaTime: ${enabled ? "enabled" : "disabled"}`;
-  status += ` | CLI: ${hasCli ? "ok" : "missing"}`;
+  status += ` | CLI: ${pathCli ? "PATH" : (hasLocalCli ? "local" : "missing")}`;
   status += ` | API: ${apiKey ? "set" : "missing"}`;
 
   editor.setStatus(status);
