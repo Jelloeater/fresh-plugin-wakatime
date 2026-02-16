@@ -1,6 +1,6 @@
 /// <reference path="./lib/fresh.d.ts" />
 
-const VERSION = "0.4.0";
+const VERSION = "0.5.0";
 
 const PLUGIN_USER_AGENT = `fresh-wakatime/${VERSION}`;
 const GITHUB_RELEASES_URL = "https://api.github.com/repos/wakatime/wakatime-cli/releases/latest";
@@ -37,6 +37,32 @@ function getCliPath(): string {
 
 function getConfigFilePath(): string {
   return editor.pathJoin(getHomeDir(), ".wakatime.cfg");
+}
+
+function getFreshConfigPath(): string {
+  return editor.pathJoin(editor.getConfigDir(), "wakatime.json");
+}
+
+function loadFreshConfig(): { enabled: boolean } {
+  try {
+    const path = getFreshConfigPath();
+    const content = editor.readFile(path);
+    if (content) {
+      return JSON.parse(content);
+    }
+  } catch {
+    // Config doesn't exist
+  }
+  return { enabled: true };
+}
+
+function saveFreshConfig(enabled: boolean): void {
+  try {
+    const path = getFreshConfigPath();
+    editor.writeFile(path, JSON.stringify({ enabled }));
+  } catch {
+    // Failed to save
+  }
 }
 
 function isWindows(): boolean {
@@ -387,6 +413,7 @@ globalThis.wakatime_on_lines_changed = function (data: { buffer_id: number }): v
 
 globalThis.wakatime_toggle = function (): void {
   enabled = !enabled;
+  saveFreshConfig(enabled);
   editor.setStatus(enabled ? "WakaTime enabled" : "WakaTime disabled");
   editor.debug(`[wakatime] ${enabled ? "enabled" : "disabled"}`);
 };
@@ -425,6 +452,10 @@ globalThis.wakatime_status = async function (): Promise<void> {
 async function init(): Promise<void> {
   editor.debug("[wakatime] Initializing...");
 
+  const config = loadFreshConfig();
+  enabled = config.enabled;
+  editor.debug(`[wakatime] Loaded config: enabled=${enabled}`);
+
   const pathCli = await findWakatimeOnPath();
   editor.debug(`[wakatime] PATH check: ${pathCli || "not found"}`);
 
@@ -447,13 +478,14 @@ async function init(): Promise<void> {
     editor.debug("[wakatime] CLI installation failed");
   }
 
-  if (apiKey && cliOk) {
-    enabled = true;
+  if (apiKey && cliOk && enabled) {
     editor.setStatus("WakaTime: Active");
   } else if (!apiKey) {
     editor.setStatus("WakaTime: Set API key");
   } else if (!cliOk) {
     editor.setStatus("WakaTime: CLI missing");
+  } else if (!enabled) {
+    editor.setStatus("WakaTime: Disabled");
   }
 
   editor.debug("[wakatime] Initialization complete");
