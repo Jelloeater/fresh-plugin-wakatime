@@ -21,12 +21,13 @@ function getEditor() {
 
 const editor = getEditor();
 
-function getConfigDir(): string {
-  return editor.getConfigDir();
+function getHomeDir(): string {
+  const configDir = editor.getConfigDir();
+  return configDir.replace(/\/([^\/]+)\/?$/, "");
 }
 
 function getWakatimeDir(): string {
-  return editor.pathJoin(editor.getHomeDir(), ".wakatime");
+  return editor.pathJoin(getHomeDir(), ".wakatime");
 }
 
 function getCliPath(): string {
@@ -35,7 +36,7 @@ function getCliPath(): string {
 }
 
 function getConfigFilePath(): string {
-  return editor.pathJoin(editor.getHomeDir(), ".wakatime.cfg");
+  return editor.pathJoin(getHomeDir(), ".wakatime.cfg");
 }
 
 function isWindows(): boolean {
