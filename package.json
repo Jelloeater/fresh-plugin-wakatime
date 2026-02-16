@@ -1,5 +1,5 @@
 {
-  "name": "fresh-plugin-wakatime",
+  "name": "wakatime",
   "version": "0.1.0",
   "description": "Automatic time tracking for Fresh editor",
   "type": "plugin",
@@ -9,7 +9,7 @@
   "main": "plugins/wakatime/wakatime.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Jelloeater/fresh-plugin-wakatime"
+    "url": "https://github.com/Jelloeater/wakatime"
   },
   "keywords": [
     "fresh",
