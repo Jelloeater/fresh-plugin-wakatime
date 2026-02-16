@@ -11,6 +11,8 @@ let lastHeartbeat = 0;
 const HEARTBEAT_INTERVAL_MS = 2 * 60 * 1000;
 
 let enabled = false;
+let cachedOs: string | null = null;
+let cachedArch: string | null = null;
 
 function getEditor() {
   return globalThis.editor;
@@ -39,22 +41,61 @@ function isWindows(): boolean {
   return getOs() === "windows";
 }
 
+async function detectOs(): Promise<string> {
+  if (cachedOs) return cachedOs;
+  try {
+    const result = await editor.spawnProcess("uname", ["-s"]);
+    if (result.exit_code === 0) {
+      const os = result.stdout.trim().toLowerCase();
+      if (os === "windowsnt" || os === "mingw") {
+        cachedOs = "windows";
+      } else if (os === "darwin") {
+        cachedOs = "darwin";
+      } else {
+        cachedOs = "linux";
+      }
+    }
+  } catch {
+    cachedOs = "linux";
+  }
+  if (!cachedOs) cachedOs = "linux";
+  return cachedOs;
+}
+
 function getOs(): string {
-  const platform = Deno.build.os;
-  if (platform === "windows") return "windows";
-  if (platform === "darwin") return "darwin";
+  if (cachedOs) return cachedOs;
   return "linux";
 }
 
+async function detectArch(): Promise<string> {
+  if (cachedArch) return cachedArch;
+  try {
+    const result = await editor.spawnProcess("uname", ["-m"]);
+    if (result.exit_code === 0) {
+      const arch = result.stdout.trim().toLowerCase();
+      if (arch === "x86_64" || arch === "amd64") {
+        cachedArch = "amd64";
+      } else if (arch === "aarch64" || arch === "arm64") {
+        cachedArch = "arm64";
+      } else if (arch === "i386" || arch === "i686") {
+        cachedArch = "386";
+      }
+    }
+  } catch {
+    cachedArch = "amd64";
+  }
+  if (!cachedArch) cachedArch = "amd64";
+  return cachedArch;
+}
+
 function getArch(): string {
-  if (Deno.build.arch === "x86_64") return "amd64";
-  if (Deno.build.arch === "aarch64") return "arm64";
-  return "386";
+  if (cachedArch) return cachedArch;
+  return "amd64";
 }
 
 function isValidApiKey(key: string): boolean {
   if (!key) return false;
-  const regex = /^(?i)(waka_)?[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/;
+  const regex = new RegExp("^(waka_)?[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$", "i");
   return regex.test(key);
 }
 
@@ -88,8 +129,21 @@ function readFromWakatimeCfg(): string | null {
   return null;
 }
 
-function getApiKey(): string | null {
-  const envKey = Deno.env.get("WAKATIME_API_KEY");
+async function getEnvVar(name: string): Promise<string | null> {
+  try {
+    const result = await editor.spawnProcess("sh", ["-c", `echo $${name}`]);
+    if (result.exit_code === 0) {
+      const value = result.stdout.trim();
+      return value || null;
+    }
+  } catch {
+    // Ignore
+  }
+  return null;
+}
+
+async function getApiKey(): Promise<string | null> {
+  const envKey = await getEnvVar("WAKATIME_API_KEY");
   if (envKey && isValidApiKey(envKey)) {
     return envKey;
   }
@@ -218,7 +272,7 @@ async function sendHeartbeat(file: string, isWrite: boolean): Promise<void> {
   if (!enabled) return;
   if (!file) return;
 
-  const apiKey = getApiKey();
+  const apiKey = await getApiKey();
   if (!apiKey) {
     editor.debug("[wakatime] No API key found");
     return;
@@ -300,7 +354,7 @@ globalThis.wakatime_toggle = function (): void {
 };
 
 globalThis.wakatime_set_api_key = async function (): Promise<void> {
-  const currentKey = getApiKey();
+  const currentKey = await getApiKey();
   const input = await editor.prompt("Enter WakaTime API Key:", currentKey || "");
 
   if (input === null || input === "") {
@@ -317,8 +371,8 @@ globalThis.wakatime_set_api_key = async function (): Promise<void> {
   editor.debug("[wakatime] API key validation passed");
 };
 
-globalThis.wakatime_status = function (): void {
-  const apiKey = getApiKey();
+globalThis.wakatime_status = async function (): Promise<void> {
+  const apiKey = await getApiKey();
   const cliPath = getCliPath();
   const hasCli = editor.fileExists(cliPath);
 
@@ -332,7 +386,7 @@ globalThis.wakatime_status = function (): void {
 async function init(): Promise<void> {
   editor.debug("[wakatime] Initializing...");
 
-  const apiKey = getApiKey();
+  const apiKey = await getApiKey();
   if (!apiKey) {
     editor.setStatus("WakaTime: No API key (set WAKATIME_API_KEY or run :wakatime.setApiKey)");
     editor.debug("[wakatime] No API key found");
