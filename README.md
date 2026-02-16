@@ -2,6 +2,8 @@
 
 Automatic time tracking for your coding activity in the [Fresh](https://getfresh.dev) editor.
 
+Related: [Feature Request #381](https://github.com/sinelaw/fresh/issues/381)
+
 ## Features
 
 - Automatic time tracking while you code

@@ -347,6 +347,13 @@ globalThis.wakatime_on_cursor_moved = function (data: { buffer_id: number }): vo
   }
 };
 
+globalThis.wakatime_on_lines_changed = function (data: { buffer_id: number }): void {
+  const path = editor.getBufferPath(data.buffer_id);
+  if (path) {
+    onEvent(path, false);
+  }
+};
+
 globalThis.wakatime_toggle = function (): void {
   enabled = !enabled;
   editor.setStatus(enabled ? "WakaTime enabled" : "WakaTime disabled");
@@ -412,6 +419,7 @@ editor.on("after_insert", "wakatime_on_after_insert");
 editor.on("after_delete", "wakatime_on_after_delete");
 editor.on("buffer_activated", "wakatime_on_buffer_activated");
 editor.on("cursor_moved", "wakatime_on_cursor_moved");
+editor.on("lines_changed", "wakatime_on_lines_changed");
 
 editor.registerCommand("wakatime.toggle", "Toggle WakaTime tracking", "wakatime_toggle", "normal");
 editor.registerCommand("wakatime.setApiKey", "Set WakaTime API key", "wakatime_set_api_key", "normal");

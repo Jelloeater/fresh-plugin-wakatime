@@ -2,7 +2,9 @@
 
 ## Project Overview
 
-Create a Fresh editor plugin that sends heartbeat data to WakaTime for automatic time tracking, similar to existing plugins for VS Code and Micro.
+Fresh editor plugin that sends heartbeat data to WakaTime for automatic time tracking.
+
+See: [Feature Request #381](https://github.com/sinelaw/fresh/issues/381)
 
 ## Architecture
 
@@ -37,6 +39,7 @@ Create a Fresh editor plugin that sends heartbeat data to WakaTime for automatic
 - `after_insert` / `after_delete` - Activity heartbeat
 - `buffer_activated` - Activity heartbeat
 - `cursor_moved` - Activity heartbeat
+- `lines_changed` - Activity heartbeat (per issue #381)
 
 ### Throttling
 - 2-minute interval between heartbeats for same file
