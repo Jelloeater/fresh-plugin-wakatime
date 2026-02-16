@@ -1,6 +1,6 @@
 /// <reference path="./lib/fresh.d.ts" />
 
-const VERSION = "0.3.0";
+const VERSION = "0.4.0";
 
 const PLUGIN_USER_AGENT = `fresh-wakatime/${VERSION}`;
 const GITHUB_RELEASES_URL = "https://api.github.com/repos/wakatime/wakatime-cli/releases/latest";
@@ -467,8 +467,10 @@ editor.on("buffer_activated", "wakatime_on_buffer_activated");
 editor.on("cursor_moved", "wakatime_on_cursor_moved");
 editor.on("lines_changed", "wakatime_on_lines_changed");
 
-editor.registerCommand("wakatime.toggle", "Toggle WakaTime tracking", "wakatime_toggle", "normal");
-editor.registerCommand("wakatime.setApiKey", "Set WakaTime API key", "wakatime_set_api_key", "normal");
-editor.registerCommand("wakatime.status", "Show WakaTime status", "wakatime_status", "normal");
+editor.registerCommand("wakatime.toggle", "Toggle WakaTime tracking", "wakatime_toggle");
+editor.registerCommand("wakatime.setApiKey", "Set WakaTime API key", "wakatime_set_api_key");
+editor.registerCommand("wakatime.status", "Show WakaTime status", "wakatime_status");
+
+editor.debug("[wakatime] Commands registered");
 
 init();
