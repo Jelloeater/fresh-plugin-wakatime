@@ -425,6 +425,9 @@ globalThis.wakatime_status = async function (): Promise<void> {
 async function init(): Promise<void> {
   editor.debug("[wakatime] Initializing...");
 
+  const pathCli = await findWakatimeOnPath();
+  editor.debug(`[wakatime] PATH check: ${pathCli || "not found"}`);
+
   const apiKey = await getApiKey();
   if (!apiKey) {
     editor.setStatus("WakaTime: No API key (set WAKATIME_API_KEY or run :wakatime.setApiKey)");
@@ -432,9 +435,6 @@ async function init(): Promise<void> {
   } else {
     editor.debug("[wakatime] API key found");
   }
-
-  const pathCli = await findWakatimeOnPath();
-  editor.debug(`[wakatime] PATH check: ${pathCli || "not found"}`);
 
   const localCli = getCliPath();
   editor.debug(`[wakatime] Local CLI path: ${localCli}`);
@@ -450,6 +450,10 @@ async function init(): Promise<void> {
   if (apiKey && cliOk) {
     enabled = true;
     editor.setStatus("WakaTime: Active");
+  } else if (!apiKey) {
+    editor.setStatus("WakaTime: Set API key");
+  } else if (!cliOk) {
+    editor.setStatus("WakaTime: CLI missing");
   }
 
   editor.debug("[wakatime] Initialization complete");
