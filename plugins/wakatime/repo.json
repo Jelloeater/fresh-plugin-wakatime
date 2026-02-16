@@ -1,0 +1,10 @@
+{
+  "name": "wakatime",
+  "type": "plugin",
+  "description": "Automatic time tracking for coding activity",
+  "author": "Your Name",
+  "tags": ["productivity", "time-tracking", "analytics"],
+  "fresh": {
+    "entry": "wakatime.ts"
+  }
+}
