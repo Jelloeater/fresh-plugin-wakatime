@@ -2,6 +2,7 @@
   "name": "fresh-plugin-wakatime",
   "version": "0.1.0",
   "description": "Automatic time tracking for Fresh editor",
+  "type": "plugin",
   "main": "plugins/wakatime/wakatime.ts",
   "repository": {
     "type": "git",
