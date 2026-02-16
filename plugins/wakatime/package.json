@@ -1,0 +1,16 @@
+{
+  "$schema": "https://fresh-editor.dev/schemas/package.schema.json",
+  "name": "wakatime",
+  "version": "1.0.0",
+  "description": "Automatic time tracking for coding activity using WakaTime",
+  "type": "plugin",
+  "author": "Jelloeater",
+  "license": "MIT",
+  "repository": "https://github.com/Jelloeater/fresh-plugin-wakatime",
+  "keywords": ["wakatime", "time-tracking", "productivity"],
+  "fresh": {
+    "min_version": "0.1.0",
+    "min_api_version": 2,
+    "entry": "wakatime.ts"
+  }
+}
