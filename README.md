@@ -15,23 +15,23 @@ Automatic time tracking for your coding activity in the [Fresh](https://getfresh
 
 1. Open Fresh command palette (`Ctrl+P` or `Cmd+P`)
 2. Search for `pkg: Install from URL`
-3. Enter: `https://github.com/Jelloeater/wakatime`
+3. Enter: `https://github.com/Jelloeater/fresh-plugin-wakatime`
 4. Restart Fresh
 
 ### Option 2: Manual Installation
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/Jelloeater/wakatime.git
+   git clone https://github.com/Jelloeater/fresh-plugin-wakatime.git
    ```
 
 2. Copy the `wakatime` folder to your Fresh plugins directory:
    ```bash
    # For Linux/macOS:
-   cp -r wakatime/plugins/wakatime ~/.config/fresh/plugins/
+   cp -r fresh-plugin-wakatime/plugins/wakatime ~/.config/fresh/plugins/
 
    # Or create a symlink:
-   ln -s /path/to/wakatime/plugins/wakatime ~/.config/fresh/plugins/wakatime
+   ln -s /path/to/fresh-plugin-wakatime/plugins/wakatime ~/.config/fresh/plugins/wakatime
    ```
 
 3. Restart Fresh

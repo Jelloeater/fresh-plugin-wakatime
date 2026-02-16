@@ -9,7 +9,7 @@
   "main": "plugins/wakatime/wakatime.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Jelloeater/wakatime"
+    "url": "https://github.com/Jelloeater/fresh-plugin-wakatime"
   },
   "keywords": [
     "fresh",
