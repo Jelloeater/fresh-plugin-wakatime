@@ -146,18 +146,21 @@ async function getEnvVar(name: string): Promise<string | null> {
 
 async function findWakatimeOnPath(): Promise<string | null> {
   if (cliFromPath) return cliFromPath;
-  try {
-    const result = await editor.spawnProcess("sh", ["-c", "command -v wakatime || which wakatime"]);
-    if (result.exit_code === 0) {
-      const path = result.stdout.trim();
-      if (path) {
-        cliFromPath = path;
-        editor.debug(`[wakatime] Found wakatime on PATH: ${path}`);
-        return path;
+  const commands = ["wakatime", "wakatime-cli"];
+  for (const cmd of commands) {
+    try {
+      const result = await editor.spawnProcess("sh", ["-c", `command -v ${cmd} || which ${cmd}`]);
+      if (result.exit_code === 0) {
+        const path = result.stdout.trim();
+        if (path) {
+          cliFromPath = path;
+          editor.debug(`[wakatime] Found wakatime on PATH: ${path}`);
+          return path;
+        }
       }
+    } catch {
+      // Not on PATH
     }
-  } catch {
-    // Not on PATH
   }
   return null;
 }
@@ -426,7 +429,17 @@ async function init(): Promise<void> {
   if (!apiKey) {
     editor.setStatus("WakaTime: No API key (set WAKATIME_API_KEY or run :wakatime.setApiKey)");
     editor.debug("[wakatime] No API key found");
+  } else {
+    editor.debug("[wakatime] API key found");
   }
+
+  const pathCli = await findWakatimeOnPath();
+  editor.debug(`[wakatime] PATH check: ${pathCli || "not found"}`);
+
+  const localCli = getCliPath();
+  editor.debug(`[wakatime] Local CLI path: ${localCli}`);
+  const localCliExists = await cliExists();
+  editor.debug(`[wakatime] Local CLI exists: ${localCliExists}`);
 
   const cliOk = await ensureCli();
   if (!cliOk) {
