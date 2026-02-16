@@ -1,6 +1,6 @@
 /// <reference path="./lib/fresh.d.ts" />
 
-const VERSION = "0.2.0";
+const VERSION = "0.3.0";
 
 const PLUGIN_USER_AGENT = `fresh-wakatime/${VERSION}`;
 const GITHUB_RELEASES_URL = "https://api.github.com/repos/wakatime/wakatime-cli/releases/latest";
